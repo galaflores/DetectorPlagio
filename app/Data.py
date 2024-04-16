@@ -12,11 +12,9 @@ class Data:
         self.data = []
         self.texto = ""
         self.ngram_number = 1
+        self.result = []
 
-    def get_data(self, directory: str) -> list:
-        # read the data from a directory
-        return self.data
-
+    @staticmethod
     def get_stemmer(self, texto: str) -> str:
         lancaster = LancasterStemmer()
         palabras = [palabra.lower() for palabra in re.findall(r'\w+', texto.lower())]
