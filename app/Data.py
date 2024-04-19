@@ -46,7 +46,11 @@ class Data:
     #     return nuevo_texto
 
     def get_grams(self, texto: str, ngram_number: int) -> list:
-        stemmed_text = self.get_stemmer(texto)
+        stemmed_text = self.get_stemmer(self, texto)  # aplica el stemming al texto
+        # TODO: Habilitar la opcion de preprocesamiento deseada (lematizacion o stemming)
+        # lemmantized_text = self.get_lemmatizer(self, texto)  # aplica la lematizacion al texto
+        # TODO: Hablitar la opcion de eliminar las stop words o no
+        # with_stop_words_text = self.get_stopwords(self, texto)  # elimina las stop words del texto
         text = re.findall(r"\w+", stemmed_text)  # separa los caracteres pre-procesados del parrafo en listas
         grams = ngrams(text, ngram_number)  # genera los ngrams
         result = []
