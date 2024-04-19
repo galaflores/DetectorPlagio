@@ -1,12 +1,12 @@
-""" from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
 import nltk
 from nltk.stem import LancasterStemmer
 from nltk.util import ngrams
 import re
 import os
 from gensim.models import Word2Vec
-#nltk.download("wordnet")
-#nltk.download("omw-1.4")
+nltk.download("wordnet")
+nltk.download("omw-1.4")
 from nltk.corpus import brown
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
@@ -83,4 +83,4 @@ ruta_docs = "dos_org"
 doc1 = cargar_docs(os.path.join(ruta_docs, "documento_org1.txt"))
 doc2 = cargar_docs(os.path.join(ruta_docs, "documento_org2.txt"))
 
-similitud_documento(doc1, doc2) """
+similitud_documento(doc1, doc2)
