@@ -21,8 +21,6 @@ def get_stemmer(text):
   return nuevo_texto
 
 
-
-
 def get_grams(text, n):
   text = get_stemmer(text) #pre-procesa el parrafo
   text = re.findall(r"\w+", text) #separa los caracteres pre-procesados del parrafo en listas
