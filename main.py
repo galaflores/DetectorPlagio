@@ -4,11 +4,19 @@ from nltk.stem import LancasterStemmer
 from nltk.util import ngrams
 import re
 import os
+from gensim.models import Word2Vec
+nltk.download("wordnet")
+nltk.download("omw-1.4")
+from nltk.corpus import brown
+from gensim.models import Word2Vec
+from sklearn.decomposition import PCA
+from matplotlib import pyplot
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
 lancStemmer = LancasterStemmer() #stemming algorithm Lancaster
 
 text1 = "Esta es una prueba. De los famosos n-gramas. Se esta usando NLTK. A diferencia de la detección de IA, que todavía es relativamente nueva y está evolucionando, la detección de plagio existe desde hace tiempo."
 text2 = "Esta es otra prueba. Esto es para el ejercicio. Usando n-gramas en clase. A diferencia de una herramienta de IA, un periodista o redactor puede mantener conversaciones reales con expertos en la materia sobre la que escribe."
-
 
 
 def get_stemmer(text):
@@ -16,6 +24,15 @@ def get_stemmer(text):
   text_lista = []
   for palabra in palabras:
     nueva = lancStemmer.stem(palabra)
+    text_lista.append(nueva)
+  nuevo_texto = ' '.join(text_lista)
+  return nuevo_texto
+
+def get_lemm(text):
+  palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
+  text_lista = []
+  for palabra in palabras:
+    nueva = lemmatizer.lemmatize(palabra)
     text_lista.append(nueva)
   nuevo_texto = ' '.join(text_lista)
   return nuevo_texto
@@ -62,8 +79,8 @@ def similitud_documento(doc1, doc2):
     print("Similitud de coseno (bigrams) entre doc1 y doc2:", similitud_bigrams[0][1])
     print("Similitud de coseno (trigrams) entre doc1 y doc2:", similitud_trigrams[0][1])
 
-ruta_dataset = "dataset.txt"
-doc1 = cargar_docs(os.path.join(ruta_dataset, "documento_org1.txt"))
-doc2 = cargar_docs(os.path.join(ruta_dataset, "documento_org2.txt"))
+ruta_docs = "dos_org"
+doc1 = cargar_docs(os.path.join(ruta_docs, "documento_org1.txt"))
+doc2 = cargar_docs(os.path.join(ruta_docs, "documento_org2.txt"))
 
 similitud_documento(doc1, doc2)
