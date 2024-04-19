@@ -1,24 +1,20 @@
-""" from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
 import nltk
 from nltk.stem import LancasterStemmer
+from sklearn.metrics.pairwise import cosine_similarity
+#from nltk.stem import WordNetLemmatizer
 from nltk.util import ngrams
 import re
-import os
-from gensim.models import Word2Vec
-#nltk.download("wordnet")
-#nltk.download("omw-1.4")
-from nltk.corpus import brown
-from gensim.models import Word2Vec
-from sklearn.decomposition import PCA
-from matplotlib import pyplot
-from nltk.stem import WordNetLemmatizer
-lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
+
+
+#lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
 lancStemmer = LancasterStemmer() #stemming algorithm Lancaster
 
 text1 = "Esta es una prueba. De los famosos n-gramas. Se esta usando NLTK. A diferencia de la detección de IA, que todavía es relativamente nueva y está evolucionando, la detección de plagio existe desde hace tiempo."
 text2 = "Esta es otra prueba. Esto es para el ejercicio. Usando n-gramas en clase. A diferencia de una herramienta de IA, un periodista o redactor puede mantener conversaciones reales con expertos en la materia sobre la que escribe."
 
 
+#----------- PREPROCESSING --------------
 def get_stemmer(text):
   palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
   text_lista = []
@@ -28,15 +24,14 @@ def get_stemmer(text):
   nuevo_texto = ' '.join(text_lista)
   return nuevo_texto
 
-def get_lemm(text):
+""" def get_lemm(text):
   palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
   text_lista = []
   for palabra in palabras:
     nueva = lemmatizer.lemmatize(palabra)
     text_lista.append(nueva)
   nuevo_texto = ' '.join(text_lista)
-  return nuevo_texto
-
+  return nuevo_texto """
 
 def get_grams(text, n):
   text = get_stemmer(text) #pre-procesa el parrafo
@@ -47,9 +42,11 @@ def get_grams(text, n):
     result.append(' '.join(ng)) #agrega los ngrams en una lista llamada result
   return result
 
-def matriz_parrafos(gramas1, gramas2):
-  grams_palabras = set(gramas1 + gramas2) #set de palabras de ambos ngrams
-  grams_juntos = [gramas1, gramas2] #lista con ambas listas de los ngrams de cada parrafo
+def matriz_parrafos(text1, text2, n):
+  grams1 = get_grams(text1, n)
+  grams2 = get_grams (text2, n)
+  grams_palabras = set(grams1 + grams2) #set de palabras de ambos ngrams
+  grams_juntos = [grams1, grams2] #lista con ambas listas de los ngrams de cada parrafo
   matriz = []
   for grama in grams_juntos:
     vector = []
@@ -58,29 +55,13 @@ def matriz_parrafos(gramas1, gramas2):
     matriz.append(vector)
   return matriz
 
-def cargar_docs(ruta):
-  with open(ruta, 'r') as file:
-    return file.read()
+#print (get_lemm(text1))
+# print(get_grams(text1, 2))
+print(matriz_parrafos(text1, text2, 2))
 
-def similitud_documento(doc1, doc2):
-    unigrams_doc1 = get_grams(doc1, 1)
-    bigrams_doc1 = get_grams(doc1, 2)
-    trigrams_doc1 = get_grams(doc1, 3)
+similitud = cosine_similarity(matriz_parrafos(text1, text2, 1))
+print(similitud)
+print("\nSimilitud de Coseno entre parrafo 1 y 2:",similitud[0][1])
 
-    unigrams_doc2 = get_grams(doc2, 1)
-    bigrams_doc2 = get_grams(doc2, 2)
-    trigrams_doc2 = get_grams(doc2, 3)
+# ------------------- PROCESS ------------------
 
-    similitud_unigrams = cosine_similarity(matriz_parrafos(unigrams_doc1, unigrams_doc2))
-    similitud_bigrams = cosine_similarity(matriz_parrafos(bigrams_doc1, bigrams_doc2))
-    similitud_trigrams = cosine_similarity(matriz_parrafos(trigrams_doc1, trigrams_doc2))
-
-    print("Similitud de coseno (unigrams) entre doc1 y doc2:", similitud_unigrams[0][1])
-    print("Similitud de coseno (bigrams) entre doc1 y doc2:", similitud_bigrams[0][1])
-    print("Similitud de coseno (trigrams) entre doc1 y doc2:", similitud_trigrams[0][1])
-
-ruta_docs = "dos_org"
-doc1 = cargar_docs(os.path.join(ruta_docs, "documento_org1.txt"))
-doc2 = cargar_docs(os.path.join(ruta_docs, "documento_org2.txt"))
-
-similitud_documento(doc1, doc2) """
