@@ -1,26 +1,31 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import nltk
+nltk.download('stopwords')
+import numpy as np
 from nltk.stem import LancasterStemmer
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.corpus import stopwords
+#from nltk.stem import WordNetLemmatizer
 from nltk.util import ngrams
 import re
 import os
-from gensim.models import Word2Vec
-nltk.download("wordnet")
-nltk.download("omw-1.4")
-from nltk.corpus import brown
-from gensim.models import Word2Vec
-from sklearn.decomposition import PCA
-from matplotlib import pyplot
-from nltk.stem import WordNetLemmatizer
-lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
+
 lancStemmer = LancasterStemmer() #stemming algorithm Lancaster
+#lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
 
-text1 = "Esta es una prueba. De los famosos n-gramas. Se esta usando NLTK. A diferencia de la detección de IA, que todavía es relativamente nueva y está evolucionando, la detección de plagio existe desde hace tiempo."
-text2 = "Esta es otra prueba. Esto es para el ejercicio. Usando n-gramas en clase. A diferencia de una herramienta de IA, un periodista o redactor puede mantener conversaciones reales con expertos en la materia sobre la que escribe."
-
+def remove_stopwords(text):
+  stopwords = set(nltk.corpus.stopwords.words('english'))
+  palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
+  text_lista = []
+  for palabra in palabras:
+    if palabra not in stopwords:
+      text_lista.append(palabra)
+  nuevo_texto = ' '.join(text_lista)
+  return nuevo_texto
 
 def get_stemmer(text):
-  palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
+  palabras = remove_stopwords(text)
+  palabras = palabras.split()
   text_lista = []
   for palabra in palabras:
     nueva = lancStemmer.stem(palabra)
@@ -28,59 +33,45 @@ def get_stemmer(text):
   nuevo_texto = ' '.join(text_lista)
   return nuevo_texto
 
-def get_lemm(text):
-  palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
-  text_lista = []
-  for palabra in palabras:
-    nueva = lemmatizer.lemmatize(palabra)
-    text_lista.append(nueva)
-  nuevo_texto = ' '.join(text_lista)
-  return nuevo_texto
-
-
 def get_grams(text, n):
   text = get_stemmer(text) #pre-procesa el parrafo
-  text = re.findall(r"\w+", text) #separa los caracteres pre-procesados del parrafo en listas
+  text = text.split() #separa los caracteres pre-procesados del parrafo en listas
   grams = ngrams(text,n) #genera los ngrams
   result = []
   for ng in grams:
     result.append(' '.join(ng)) #agrega los ngrams en una lista llamada result
   return result
 
-def matriz_parrafos(gramas1, gramas2):
-  grams_palabras = set(gramas1 + gramas2) #set de palabras de ambos ngrams
-  grams_juntos = [gramas1, gramas2] #lista con ambas listas de los ngrams de cada parrafo
-  matriz = []
-  for grama in grams_juntos:
-    vector = []
-    for palabra in grams_palabras:
-      vector.append(1 if palabra in grama else 0) #compara las palabras de los grams a la palabra y agrega o un 1 o un 0 al vector del parrafo
-    matriz.append(vector)
-  return matriz
+def pre_procesados (folder_path, n):
+  preprocess_texts = []
+  for fileid in os.listdir(folder_path):
+    if fileid.endswith(".txt"):
+      filepath = os.path.join(folder_path, fileid)
+      with open(filepath, 'r', encoding='latin1', errors='ignore') as file:
+        text = file.read()
+        grams = get_grams(text, n)
+        preprocess_texts.append(grams)
+  return preprocess_texts
 
-def cargar_docs(ruta):
-  with open(ruta, 'r') as file:
-    return file.read()
+def matriz_parrafos(grams1, grams2):
+    grams_palabras = set(grams1 + grams2)  # set de palabras de ambos ngrams
+    grams_juntos = [grams1, grams2]  # lista con ambas listas de los ngrams de cada parrafo
+    matriz = []
+    for grama in grams_juntos:
+        vector = []
+        for palabra in grams_palabras:
+            vector.append(1 if palabra in grama else 0)  # compara las palabras de los grams a la palabra y agrega 1 o 0 al vector del parrafo
+        matriz.append(vector)
+    return matriz
 
-def similitud_documento(doc1, doc2):
-    unigrams_doc1 = get_grams(doc1, 1)
-    bigrams_doc1 = get_grams(doc1, 2)
-    trigrams_doc1 = get_grams(doc1, 3)
+# Obtener n-gramas preprocesados
+folder_path = "../DetectorPlagio/textos_plagiados"
+preprocess_plagiados = pre_procesados(folder_path, 2)
 
-    unigrams_doc2 = get_grams(doc2, 1)
-    bigrams_doc2 = get_grams(doc2, 2)
-    trigrams_doc2 = get_grams(doc2, 3)
+folder_path_og = "../DetectorPlagio/docs_org"
+preprocess_originales = pre_procesados(folder_path_og, 2)
 
-    similitud_unigrams = cosine_similarity(matriz_parrafos(unigrams_doc1, unigrams_doc2))
-    similitud_bigrams = cosine_similarity(matriz_parrafos(bigrams_doc1, bigrams_doc2))
-    similitud_trigrams = cosine_similarity(matriz_parrafos(trigrams_doc1, trigrams_doc2))
-
-    print("Similitud de coseno (unigrams) entre doc1 y doc2:", similitud_unigrams[0][1])
-    print("Similitud de coseno (bigrams) entre doc1 y doc2:", similitud_bigrams[0][1])
-    print("Similitud de coseno (trigrams) entre doc1 y doc2:", similitud_trigrams[0][1])
-
-ruta_docs = "dos_org"
-doc1 = cargar_docs(os.path.join(ruta_docs, "documento_org1.txt"))
-doc2 = cargar_docs(os.path.join(ruta_docs, "documento_org2.txt"))
-
-similitud_documento(doc1, doc2)
+for idx_plagiado, grams_plagiado in enumerate(preprocess_plagiados, 1):
+    for idx_original, grams_original in enumerate(preprocess_originales, 1):
+        similitud = cosine_similarity(matriz_parrafos(grams_plagiado, grams_original))
+        print(f"Similitud de Coseno entre plagiado {idx_plagiado} y original {idx_original}: {similitud[0][1]}")
