@@ -50,7 +50,7 @@ def pre_procesados (folder_path, n):
       with open(filepath, 'r', encoding='latin1', errors='ignore') as file:
         text = file.read()
         grams = get_grams(text, n)
-        preprocess_texts.append(grams)
+        preprocess_texts.append((fileid, grams))
   return preprocess_texts
 
 def matriz_parrafos(grams1, grams2):
@@ -71,7 +71,8 @@ preprocess_plagiados = pre_procesados(folder_path, 2)
 folder_path_og = "../DetectorPlagio/docs_org"
 preprocess_originales = pre_procesados(folder_path_og, 2)
 
-for idx_plagiado, grams_plagiado in enumerate(preprocess_plagiados, 1):
-    for idx_original, grams_original in enumerate(preprocess_originales, 1):
+for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
+    print(f'\nDocumento analizado: {name_plagiado}')
+    for id_original, (name_original, grams_original) in enumerate(preprocess_originales, 1):
         similitud = cosine_similarity(matriz_parrafos(grams_plagiado, grams_original))
-        print(f"Similitud de Coseno entre plagiado {idx_plagiado} y original {idx_original}: {similitud[0][1]}")
+        print(f"Similitud de Coseno entre {name_plagiado} y {name_original}: {similitud[0][1]}")
