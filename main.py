@@ -75,7 +75,7 @@ def matriz_parrafos(grams1, grams2):
 folder_path = "../DetectorPlagio/textos_plagiados"
 preprocess_plagiados = pre_procesados(folder_path, 2)
 
-folder_path_og = "../DetectorPlagio/docs_org"
+folder_path_og = "../DetectorPlagio/docs_originales"
 preprocess_originales = pre_procesados(folder_path_og, 2)
 
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
