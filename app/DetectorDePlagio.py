@@ -25,6 +25,7 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
             return grams
 
     def analizar_similitud(self, folder_path_plagiados: str, folder_path_originales: str) -> List[List[Any]]:
+
         preprocess_plagiados = self.preprocesar_texto(folder_path_plagiados, False)
         preprocess_originales = self.preprocesar_texto(folder_path_originales, False)
 
@@ -38,3 +39,25 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
         resultados.sort(key=lambda x: x[2], reverse=True)
 
         return resultados
+
+    def generar_documentos_pdf(self, folder_path_plagiados: str, folder_path_og: str,
+                               resultados: List[List[Any]]) -> List[List[Any]]:
+        resultados_finales = []
+        for titulo in resultados:
+            sentences_originales = self.buscar_y_tokenizar(folder_path_og, titulo[1])
+            sentences_plagiados = self.buscar_y_tokenizar(folder_path_plagiados, titulo[0])
+
+            if sentences_originales and sentences_plagiados:
+                similitud = titulo[2]
+                coincidencias = self.encontrar_coincidencias(sentences_originales, sentences_plagiados)
+                resultados_finales.append(
+                    [
+                    "Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%", "\n",
+                    f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':", "\n",
+                    f"Coincidencias: {coincidencias}"
+                    ]
+                )
+                # TODO: Llamar a la función para crear el documento PDF
+                self.crear_documento_pdf(titulo[0], similitud, coincidencias)
+
+            return resultados_finales

@@ -3,6 +3,9 @@
 
 import pytest
 
+from app.DetectorDePlagio import DetectorDePlagio
+
+
 class TestPreprocesarTexto:
 
     # Returns a list of n-grams for a given file path and directory path.

@@ -13,6 +13,7 @@ class App(customtkinter.CTk, tk.Tk):
         super().__init__()
         self.geometry("550x600")
         self.title("Detector de plagio")
+        self.path_plagiados = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados"
 
         # Botón para seleccionar la carpeta y mostrar la ruta.
         self.select_folder_button = customtkinter.CTkButton(self, text="Seleccionar Carpeta",
@@ -47,6 +48,7 @@ class App(customtkinter.CTk, tk.Tk):
             self.start_button.configure(fg_color="green")  # Botón en verde cuando hay una ruta seleccionada
 
     def start_functionality(self):
+        self.result_text.insert(tk.END,"Iniciando análisis de similitud...\n")
         # Obtener la ruta de la carpeta
         folder_path = self.folder_path_label.cget("text")
 
@@ -61,11 +63,27 @@ class App(customtkinter.CTk, tk.Tk):
 
         elif os.path.isdir(selected_path):
             # Si es una carpeta, se preprocesan los archivos de la carpeta seleccionada
-            # preprocess_original = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, False)
-            similitud = DetectorDePlagio.DetectorDePlagio().analizar_similitud("/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados", selected_path)
+            preprocess_originales = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, False)
+            similitud = DetectorDePlagio.DetectorDePlagio().analizar_similitud(
+                self.path_plagiados,
+                selected_path)
+            pdf = DetectorDePlagio.DetectorDePlagio().generar_documentos_pdf(
+                self.path_plagiados,
+                selected_path,
+                similitud
+            )
+
             for res in similitud:
                 self.result_text.insert(tk.END, res)
                 self.result_text.insert(tk.END, "\n")
+            self.result_text.insert(tk.END, "----------------------\n")
+            for res in pdf:
+                self.result_text.insert(tk.END, res)
+                self.result_text.insert(tk.END, "\n")
+            self.result_text.insert(tk.END, "El analissi ha terminado\n")
+
+
+
         else:
             print("Error: La ruta seleccionada no es válida.")
 
