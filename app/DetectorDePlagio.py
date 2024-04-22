@@ -42,21 +42,21 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
     def generar_documentos_pdf(self, folder_path_plagiados: str, folder_path_og: str,
                                resultados: List[List[Any]]) -> List[List[Any]]:
         resultados_finales = []
-        total_TP = 0
+        """ total_TP = 0
         total_FP = 0
         total_TN = 0
-        total_FN = 0
+        total_FN = 0 """
         for titulo in resultados:
             sentences_originales = self.buscar_y_tokenizar(folder_path_og, titulo[1])
             sentences_plagiados = self.buscar_y_tokenizar(folder_path_plagiados, titulo[0])
 
             if sentences_originales and sentences_plagiados:
                 similitud = titulo[2]
-                coincidencias, matriz_auc = self.encontrar_coincidencias(sentences_originales, sentences_plagiados)
-                total_TP += matriz_auc['TP']
+                coincidencias = self.encontrar_coincidencias(sentences_originales, sentences_plagiados)
+                """ total_TP += matriz_auc['TP']
                 total_FP += matriz_auc['FP']
                 total_TN += matriz_auc['TN']
-                total_FN += matriz_auc['FN']
+                total_FN += matriz_auc['FN'] """
                 resultados_finales.append(
                     [
                         f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%",
@@ -68,9 +68,9 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
 
                 # llamar a la función para crear el documento PDF
                 self.crear_documento_pdf(titulo, similitud, coincidencias)
-        # Calculando TPR, FPR y AUC
+        """ # Calculando TPR, FPR y AUC
         TPR = total_TP / (total_TP + total_FN) if (total_TP + total_FN) != 0 else 0
         FPR = total_FP / (total_FP + total_TN) if (total_FP + total_TN) != 0 else 0
-        AUC = (1 + TPR - FPR) / 2
+        AUC = (1 + TPR - FPR) / 2 """
 
         return resultados_finales

@@ -22,10 +22,10 @@ class Procesamiento:
     @staticmethod
     def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> List[
         Dict[str, Any]]:
-        TP = 0
+        """ TP = 0
         FP = 0
         TN = 0
-        FN = 0
+        FN = 0 """
         coincidencias: List[Dict[str, Any]] = []
         for sentence_orig in sentences_originales:
             for sentence_plag in sentences_plagiados:
@@ -48,7 +48,7 @@ class Procesamiento:
                             "cadena_plag": sentence_plag[match.b:match.b + match.size],
                             "longitud": match.size
                         })
-                        if sentence_orig == sentence_plag:
+                        """ if sentence_orig == sentence_plag:
                             TP += 1
                         else:
                             FP += 1
@@ -63,9 +63,9 @@ class Procesamiento:
             "TN": TN,
             "FN": FN
         }
-        print(matriz_auc)
+        print(matriz_auc) """
 
-        return coincidencias, matriz_auc
+        return coincidencias#, matriz_auc
 
     @staticmethod
     def crear_documento_pdf(titulo: Tuple[str, str], similitud: float, coincidencias: List[Dict[str, Any]]) -> None:
