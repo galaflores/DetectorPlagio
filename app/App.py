@@ -61,7 +61,7 @@ class App(customtkinter.CTk, tk.Tk):
 
         elif os.path.isdir(selected_path):
             # Si es una carpeta, se preprocesan los archivos de la carpeta seleccionada
-            preprocess_original = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, False)
+            # preprocess_original = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, False)
             similitud = DetectorDePlagio.DetectorDePlagio().analizar_similitud("/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados", selected_path)
             for res in similitud:
                 self.result_text.insert(tk.END, res)
