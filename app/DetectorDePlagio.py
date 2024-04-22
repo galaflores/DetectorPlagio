@@ -72,5 +72,10 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
         TPR = total_TP / (total_TP + total_FN) if (total_TP + total_FN) != 0 else 0
         FPR = total_FP / (total_FP + total_TN) if (total_FP + total_TN) != 0 else 0
         AUC = (1 + TPR - FPR) / 2
+        
+        # Imprimiendo los valores calculados
+        print(f"TPR (Tasa de Verdaderos Positivos): {TPR:.2f}")
+        print(f"FPR (Tasa de Falsos Positivos): {FPR:.2f}")
+        print(f"AUC (Área bajo la curva ROC): {AUC:.2f}")
 
         return resultados_finales
