@@ -3,6 +3,7 @@ import nltk
 import os
 import difflib
 from fpdf import FPDF
+
 nltk.download('stopwords')
 import numpy as np
 from nltk.stem import LancasterStemmer
@@ -11,8 +12,8 @@ from nltk.corpus import stopwords
 from nltk.util import ngrams
 import re
 
-
 lancStemmer = LancasterStemmer()  # stemming algorithm Lancaster
+
 
 # lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
 def remove_stopwords(text):
@@ -25,6 +26,7 @@ def remove_stopwords(text):
     nuevo_texto = ' '.join(text_lista)
     return nuevo_texto
 
+
 def get_stemmer(text):
     palabras = remove_stopwords(text)
     palabras = palabras.split()
@@ -34,6 +36,7 @@ def get_stemmer(text):
         text_lista.append(nueva)
     nuevo_texto = ' '.join(text_lista)
     return nuevo_texto
+
 
 def get_grams(text, n):
     text = get_stemmer(text)  # pre-procesa el parrafo
@@ -46,17 +49,19 @@ def get_grams(text, n):
         for ng in grams:
             result.append(' '.join(ng))  # agrega los ngrams en una lista llamada result
         return result
-    
-def pre_procesados (folder_path, n):
-  preprocess_texts = []
-  for fileid in os.listdir(folder_path):
-    if fileid.endswith(".txt"):
-      filepath = os.path.join(folder_path, fileid)
-      with open(filepath, 'r', encoding='latin1', errors='ignore') as file:
-        text = file.read()
-        grams = get_grams(text, n)
-        preprocess_texts.append((fileid, grams))
-  return preprocess_texts
+
+
+def pre_procesados(folder_path, n):
+    preprocess_texts = []
+    for fileid in os.listdir(folder_path):
+        if fileid.endswith(".txt"):
+            filepath = os.path.join(folder_path, fileid)
+            with open(filepath, 'r', encoding='latin1', errors='ignore') as file:
+                text = file.read()
+                grams = get_grams(text, n)
+                preprocess_texts.append((fileid, grams))
+    return preprocess_texts
+
 
 def matriz_parrafos(grams1, grams2):
     grams_palabras = set(grams1 + grams2)  # set de palabras de ambos ngrams
@@ -70,11 +75,12 @@ def matriz_parrafos(grams1, grams2):
         matriz.append(vector)
     return matriz
 
+
 # Obtener n-gramas preprocesados
-folder_path = "/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
+folder_path = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
 preprocess_plagiados = pre_procesados(folder_path, 3)
 
-folder_path_og = "/docs_originales"  # Ruta de la carpeta con los textos originales
+folder_path_og = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/docs_originales"  # Ruta de la carpeta con los textos originales
 preprocess_originales = pre_procesados(folder_path_og, 3)
 
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
@@ -82,7 +88,7 @@ for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiad
     for id_original, (name_original, grams_original) in enumerate(preprocess_originales, 1):
         similitud = cosine_similarity(matriz_parrafos(grams_plagiado, grams_original))
         print(f"Similitud de Coseno entre {name_plagiado} y {name_original}: {similitud[0][1]}")
-        
+
 resultados = []
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
     for id_original, (name_original, grams_original) in enumerate(preprocess_originales, 1):
@@ -96,7 +102,6 @@ for resultado in resultados:
     for plagiados in preprocess_plagiados:
         if plagiados[0] == resultado[0]:
             lista_titulos.append([plagiados[0], resultado[1]])
-            
 
 
 def buscar_y_tokenizar(directorio, nombre_archivo):
@@ -109,8 +114,14 @@ def buscar_y_tokenizar(directorio, nombre_archivo):
                 return sentences
     return None
 
+
 def encontrar_coincidencias(sentences_originales, sentences_plagiados):
     coincidencias = []
+    # Contadores para la matriz de auc
+    TP = 0
+    FP = 0
+    TN = 0
+    FN = 0
 
     for sentence_orig in sentences_originales:
         for sentence_plag in sentences_plagiados:
@@ -121,45 +132,61 @@ def encontrar_coincidencias(sentences_originales, sentences_plagiados):
                 cadena_orig_stemmed = get_stemmer(sentence_orig[match.a:match.a + match.size])
                 cadena_plag_stemmed = get_stemmer(sentence_plag[match.b:match.b + match.size])
                 # Contar las palabras en las coincidencias después de aplicar el stemming y eliminar las stopwords
-                palabras_orig = remove_stopwords(cadena_orig_stemmed).split()
-                palabras_plag = remove_stopwords(cadena_plag_stemmed).split()
-                if len(palabras_orig) > 1 and len(palabras_plag) > 1:  # Solo considerar coincidencias con más de una palabra
+                palabras_orig = cadena_orig_stemmed.split()
+                palabras_plag = cadena_plag_stemmed.split()
+
+                if len(palabras_orig) > 3 and len(palabras_plag) > 3:  # Solo considerar coincidencias con más de una palabra
                     coincidencias.append({
                         "cadena_orig": sentence_orig[match.a:match.a + match.size],
                         "cadena_plag": sentence_plag[match.b:match.b + match.size],
                         "longitud": match.size
                     })
+                    # Actualizar contadores de la matriz de auc
+                    if sentence_orig == sentence_plag:
+                      TP += 1
+                    else:
+                      FP += 1
+            else:
+              if sentence_orig not in sentences_originales:
+                TN += 1
+              else:
+                FN += 1
+    matriz_auc = {
+        'TP': TP,
+        'FP': FP,
+        'TN': TN,
+        'FN': FN
+    }
+    print(matriz_auc)
 
-    return coincidencias
+    return coincidencias, matriz_auc
 
-def calcular_similitud_ngramas(sentences_originales, sentences_plagiados, n):
-    grams_originales = []
-    grams_plagiados = []
+total_coincidencias = []
+total_TP = 0
+total_FP = 0
+total_TN = 0
+total_FN = 0
 
-    for sentence in sentences_originales:
-        grams_originales.extend(get_grams(sentence, n))
-    for sentence in sentences_plagiados:
-        grams_plagiados.extend(get_grams(sentence, n))
-        
-
-    matriz = matriz_parrafos(grams_originales, grams_plagiados)
-    # Calcular la similitud coseno entre las matrices de n-gramas
-    similitud = cosine_similarity(matriz)[0][1]
-
-    return similitud
-
-for titulo in lista_titulos:
+for titulo in resultados:
     resultados = []
     sentences_originales = buscar_y_tokenizar(folder_path_og, titulo[1])
     sentences_plagiados = buscar_y_tokenizar(folder_path, titulo[0])
     print(f"Titulo: {titulo[0]}")
-    
+
     if sentences_originales and sentences_plagiados:
-        similitud = calcular_similitud_ngramas(sentences_originales, sentences_plagiados, 0) 
+        # Similitud = calcular_similitud_ngramas(sentences_originales, sentences_plagiados, 3)
+        similitud = titulo[2]
         print(f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%")
-        coincidencias = encontrar_coincidencias(sentences_originales, sentences_plagiados)
+        coincidencias, matriz_auc = encontrar_coincidencias(sentences_originales, sentences_plagiados)
+        # Actualizar contadores totales de la matriz de auc
+        total_TP += matriz_auc['TP']
+        total_FP += matriz_auc['FP']
+        total_TN += matriz_auc['TN']
+        total_FN += matriz_auc['FN']
         print(f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':")
-        
+        total_coincidencias.extend(coincidencias)
+
+        print("----------------------------\n")
         for coincidencia in coincidencias:
             print(f"Cadena original: {coincidencia['cadena_orig']} (Longitud: {coincidencia['longitud']})")
             print(f"Cadena plagiada: {coincidencia['cadena_plag']}")
@@ -168,51 +195,12 @@ for titulo in lista_titulos:
         print(f"No se encontraron oraciones en '{titulo[0]}' o '{titulo[1]}'")
     print("----------------------------\n")
 
-def crear_documento_pdf(titulo, similitud, coincidencias):
-    # Crear un nuevo objeto PDF
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
+# Calculando TPR, FPR y AUC
+TPR = total_TP / (total_TP + total_FN) if (total_TP + total_FN) != 0 else 0
+FPR = total_FP / (total_FP + total_TN) if (total_FP + total_TN) != 0 else 0
+AUC = (1 + TPR - FPR) / 2
 
-    # Agregar una página
-    pdf.add_page()
-
-    # Establecer la fuente y el tamaño del texto
-    pdf.set_font("Arial", size=12)
-
-    # Título del documento
-    pdf.cell(200, 10, txt=f"Resultados de prueba de plagio: {titulo[1]}", ln=True, align="C")
-
-    # Plagio detectado
-    pdf.cell(200, 10, txt=f"Plagio detectado: {similitud * 100:.2f}%", ln=True, align="C")
-    pdf.ln(5)
-
-    # Texto con resaltado de las coincidencias
-    for coincidencia in coincidencias:
-        cadena_orig = coincidencia['cadena_orig']
-        cadena_plag = coincidencia['cadena_plag']
-        # Verificar si existe la clave 'referencia'
-        if 'referencia' in coincidencia:
-            referencia = coincidencia['referencia']
-            texto = f"Texto original: {cadena_orig}\nTexto plagiado: {cadena_plag}\nReferencia: {referencia}\n\n"
-        else:
-            texto = f"Texto original: {cadena_orig}\nTexto plagiado: {cadena_plag}\n\n"
-        pdf.set_font("Arial", style="B")
-        pdf.multi_cell(0, 10, txt=texto, border=1, align="L")
-
-    # Guardar el documento PDF en la carpeta de resultados
-    nombre_archivo = f"Resultado_similitud_{titulo[0]}_y_{titulo[1]}.pdf"
-    ruta_archivo = os.path.join("/app/Resultados", nombre_archivo)
-    pdf.output(ruta_archivo)
-
-
-for titulo in lista_titulos:
-    resultados = []
-    sentences_originales = buscar_y_tokenizar(folder_path_og, titulo[1])
-    sentences_plagiados = buscar_y_tokenizar(folder_path, titulo[0])
-
-    if sentences_originales and sentences_plagiados:
-        similitud = calcular_similitud_ngramas(sentences_originales, sentences_plagiados, 0) 
-        coincidencias = encontrar_coincidencias(sentences_originales, sentences_plagiados)
-            
-        # Llamar a la función para crear el documento PDF
-        crear_documento_pdf(titulo, similitud, coincidencias)
+# Imprimiendo los valores calculados
+print(f"TPR (Tasa de Verdaderos Positivos): {TPR:.2f}")
+print(f"FPR (Tasa de Falsos Positivos): {FPR:.2f}")
+print(f"AUC (Área bajo la curva ROC): {AUC:.2f}")

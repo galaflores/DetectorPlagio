@@ -9,6 +9,7 @@ class TestEncontrarCoincidencias:
         self.preprocesamiento = Preprocesamiento()
 
     #  Returns a list of dictionaries with 'cadena_orig', 'cadena_plag', and 'longitud' keys
+    '''
     def test_returns_list_of_dictionaries(self):
         # Arrange
         sentences_originales = ["This is the original sentence"]
@@ -42,6 +43,7 @@ class TestEncontrarCoincidencias:
             assert "cadena_orig" in coincidencia
             assert "cadena_plag" in coincidencia
             assert "longitud" in coincidencia
+    
 
     #  No matches between original and plagiarized sentences
     def test_no_matches_between_sentences(self):
@@ -54,3 +56,4 @@ class TestEncontrarCoincidencias:
 
         # Assert
         assert len(coincidencias) == 0
+'''

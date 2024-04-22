@@ -20,8 +20,7 @@ class Procesamiento:
         return matriz
 
     @staticmethod
-    def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> List[
-        Dict[str, Any]]:
+    def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
         coincidencias: List[Dict[str, Any]] = []
         # Contadores para las métricas AUC
         TP = 0
@@ -33,7 +32,7 @@ class Procesamiento:
             for sentence_plag in sentences_plagiados:
                 matcher = difflib.SequenceMatcher(None, sentence_orig, sentence_plag)
                 match = matcher.find_longest_match(0, len(sentence_orig), 0, len(sentence_plag))
-                if match.size > 3:
+                if match.size > 0:
                     # Crear instancias de la clase Preprocesamiento
                     preprocesamiento = Preprocesamiento()
                     # Llamar al método get_stemmer de Preprocesamiento
@@ -106,4 +105,3 @@ class Procesamiento:
         ruta_archivo = os.path.join("/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/app/Resultados",
                                     nombre_archivo)
         pdf.output(ruta_archivo)
-
