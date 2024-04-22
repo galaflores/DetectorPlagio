@@ -76,13 +76,24 @@ class App(customtkinter.CTk, tk.Tk):
             for res in similitud:
                 self.result_text.insert(tk.END, res)
                 self.result_text.insert(tk.END, "\n")
-            self.result_text.insert(tk.END, "----------------------\n")
+            self.result_text.insert(tk.END, "------------------------------------------------------------\n")
             for res in pdf:
-                self.result_text.insert(tk.END, res)
+                self.result_text.insert(tk.END, res[0])
                 self.result_text.insert(tk.END, "\n")
-            self.result_text.insert(tk.END, "El analissi ha terminado\n")
-
-
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, res[1])
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, res[2])
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "------------------------------------------------------------\n")
+                self.result_text.insert(tk.END, "\n")
+                self.result_text.insert(tk.END, "\n")
+            self.result_text.insert(tk.END, "El analisis finalizo\n")
 
         else:
             print("Error: La ruta seleccionada no es válida.")

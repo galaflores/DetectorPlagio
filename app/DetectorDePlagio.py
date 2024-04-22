@@ -52,12 +52,12 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
                 coincidencias = self.encontrar_coincidencias(sentences_originales, sentences_plagiados)
                 resultados_finales.append(
                     [
-                    "Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%", "\n",
-                    f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':", "\n",
+                    f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%",
+                    f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':",
                     f"Coincidencias: {coincidencias}"
                     ]
                 )
                 # TODO: Llamar a la función para crear el documento PDF
-                self.crear_documento_pdf(titulo[0], similitud, coincidencias)
+                self.crear_documento_pdf(titulo, similitud, coincidencias)
 
-            return resultados_finales
+        return resultados_finales

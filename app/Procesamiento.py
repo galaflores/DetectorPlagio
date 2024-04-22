@@ -60,7 +60,7 @@ class Procesamiento:
         pdf.set_font("Arial", size=12)
 
         # Título del documento
-        pdf.cell(200, 10, txt=f"Resultados de prueba de plagio: {titulo[1]}", ln=True, align="C")
+        pdf.cell(200, 10, txt=f"Resultados de prueba de plagio: {titulo}", ln=True, align="C")
 
         # Plagio detectado
         pdf.cell(200, 10, txt=f"Plagio detectado: {similitud * 100:.2f}%", ln=True, align="C")
