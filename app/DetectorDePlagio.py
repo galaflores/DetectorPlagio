@@ -68,5 +68,9 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
 
                 # llamar a la función para crear el documento PDF
                 self.crear_documento_pdf(titulo, similitud, coincidencias)
+        # Calculando TPR, FPR y AUC
+        TPR = total_TP / (total_TP + total_FN) if (total_TP + total_FN) != 0 else 0
+        FPR = total_FP / (total_FP + total_TN) if (total_FP + total_TN) != 0 else 0
+        AUC = (1 + TPR - FPR) / 2
 
         return resultados_finales
