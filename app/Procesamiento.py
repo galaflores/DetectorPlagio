@@ -22,7 +22,6 @@ class Procesamiento:
     @staticmethod
     def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> List[
         Dict[str, Any]]:
-
         coincidencias: List[Dict[str, Any]] = []
         for sentence_orig in sentences_originales:
             for sentence_plag in sentences_plagiados:
