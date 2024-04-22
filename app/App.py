@@ -13,7 +13,7 @@ class App(customtkinter.CTk, tk.Tk):
         super().__init__()
         self.geometry("550x600")
         self.title("Detector de plagio")
-        self.path_plagiados = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados"
+        self.path_plagiados = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados" # Cambiar la ruta.
 
         # Botón para seleccionar la carpeta y mostrar la ruta.
         self.select_folder_button = customtkinter.CTkButton(self, text="Seleccionar Carpeta",
