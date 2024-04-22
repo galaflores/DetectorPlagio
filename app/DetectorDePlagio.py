@@ -1,43 +1,40 @@
-from typing import Tuple, Any
-
-from Data import Data
+from typing import List, Tuple, Any
+import Preprocesamineto
+import Procesamiento
+from sklearn.metrics.pairwise import cosine_similarity
 import os
 
 
-class DetectorDePlagio(Data):
+class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesamiento):
     def __init__(self):
         super().__init__()
         self.texto_stems = []
         self.archivo_texto_stems = []
 
-    def preprocesar_texto(self, archivo: str, ruta: str) -> list:
+    def preprocesar_texto(self, ruta: str, is_archivo: bool) -> list:
         """
-        Esta funcion recibe un strig con la ruta del archivo y devuelve una lista con los ngramas del texto preprocesado
+        Esta funcion recibe una ruta y el tipo (si es archivo o carpeta) y manda a preprocesar el texto
         """
+        if not is_archivo:
+            return self.pre_procesados(ruta, 3)
+        else:
+            # Procesar un archivo individualmente
+            with open(ruta, 'r', encoding='latin1', errors='ignore') as file:
+                text = file.read()
+                grams = self.get_grams(text, 3)
+            return grams
 
-        # Importa los archivos de la base de datos y los manda a preprocesar
-        for filename in os.listdir(ruta):
-            if filename.endswith(".txt"):
-                with open(os.path.join(ruta, filename), 'r') as f:
-                    texto = f.read()
-                    archivo_texto_stems = self.get_grams(texto, 3)
-                    self.archivo_texto_stems.append(archivo_texto_stems)
+    def analizar_similitud(self, folder_path_plagiados: str, folder_path_originales: str) -> List[List[Any]]:
+        preprocess_plagiados = self.preprocesar_texto(folder_path_plagiados, False)
+        preprocess_originales = self.preprocesar_texto(folder_path_originales, False)
 
-        # Importar el archivo seleccionado y mandarlo a preprocesar
-        with open(archivo, "r", encoding="utf-8") as file:
-            texto = file.read()
-            # TODO: Hablititar la opcion de preprocesamiento deseada (lematizacion o stemming)
-            #  y numero de ngramas a usar
-            self.texto_stems = self.get_grams(texto, 3)
+        resultados = []
+        for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
+            for id_original, (name_original, grams_original) in enumerate(preprocess_originales, 1):
+                similitud = cosine_similarity(self.matriz_parrafos(grams_plagiado, grams_original))
+                if similitud[0][1] != 0.0 and similitud[0][1] >= 0.2:
+                    resultados.append([name_plagiado, name_original, similitud[0][1]])
 
-        # Suma el resultado del preprocesamiento a la base de datos y del archivo
-        return [self.texto_stems] + [self.archivo_texto_stems]
+        resultados.sort(key=lambda x: x[2], reverse=True)
 
-    # TODO: Habilitar la deteccion de plagio
-    @staticmethod
-    def deteccion_de_plagio(self, texto_preprocesado, option):
-        """
-        Esta función recibe el texto preprocesadio y aplica el modelo de detección de plagio entre el texto preprocesado
-        y el texto de los archivos de la base de datos
-        """
-        return texto_preprocesado
+        return resultados
