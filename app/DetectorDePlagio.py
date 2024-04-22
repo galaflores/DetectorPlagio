@@ -1,8 +1,7 @@
-from typing import List, Tuple, Any
+from typing import List, Any
 import Preprocesamineto
 import Procesamiento
 from sklearn.metrics.pairwise import cosine_similarity
-import os
 
 
 class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesamiento):
@@ -52,12 +51,14 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
                 coincidencias = self.encontrar_coincidencias(sentences_originales, sentences_plagiados)
                 resultados_finales.append(
                     [
-                    f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%",
-                    f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':",
-                    f"Coincidencias: {coincidencias}"
+                        f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%",
+                        f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':",
+                        f"Coincidencias: {coincidencias}"
                     ]
                 )
-                # TODO: Llamar a la función para crear el documento PDF
+                # TODO: Regresar el porcentaje total de similitud y en que documento hubo mayor similitud
+
+                # llamar a la función para crear el documento PDF
                 self.crear_documento_pdf(titulo, similitud, coincidencias)
 
         return resultados_finales

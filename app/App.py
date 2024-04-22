@@ -15,6 +15,8 @@ class App(customtkinter.CTk, tk.Tk):
         self.title("Detector de plagio")
         self.path_plagiados = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados" # Cambiar la ruta.
 
+        # TODO: Boton para seleccionar archivo en solitairo de texto
+
         # Botón para seleccionar la carpeta y mostrar la ruta.
         self.select_folder_button = customtkinter.CTkButton(self, text="Seleccionar Carpeta",
                                                             command=self.select_folder)
@@ -25,13 +27,15 @@ class App(customtkinter.CTk, tk.Tk):
                                                     state=tk.DISABLED)
         self.start_button.grid(row=0, column=1, padx=20, pady=10)
 
-        # Sección 4: Botón para limpiar los resultados
+        # Botón para limpiar los resultados
         self.clear_results_button = customtkinter.CTkButton(self, text="Limpiar Resultados", command=self.clear_results)
         self.clear_results_button.grid(row=0, column=2, padx=20, pady=10)
 
         # Label para mostrar la ruta seleccionada
         self.folder_path_label = tk.Label(self, text="", font=("Arial", 8))  # Texto más pequeño
         self.folder_path_label.grid(row=1, column=0, columnspan=3, padx=20, pady=5, sticky="we")
+
+        # TODO: Agregar parametrizacion para el preprocesamiento de los textos
 
         # Widget de texto para mostrar los resultados
         self.result_text = tk.Text(self, height=20, width=60)
@@ -56,14 +60,12 @@ class App(customtkinter.CTk, tk.Tk):
         self.detect_plagiarism(folder_path)
 
     def detect_plagiarism(self, selected_path: str):
+        # TODO: Finalizar la implementación de la función detect_plagiarism para archivo en solitario
         if os.path.isfile(selected_path):
-            # Si es un archivo, se preprocesa el archivo seleccionado
             preprocess_originales = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, True)
             print("Es un archivo")
 
         elif os.path.isdir(selected_path):
-            # Si es una carpeta, se preprocesan los archivos de la carpeta seleccionada
-            preprocess_originales = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, False)
             similitud = DetectorDePlagio.DetectorDePlagio().analizar_similitud(
                 self.path_plagiados,
                 selected_path)
@@ -101,6 +103,7 @@ class App(customtkinter.CTk, tk.Tk):
     def clear_results(self):
         # Función para limpiar los resultados en la sección 4
         self.result_text.delete(1.0, tk.END)
+
 
 
 app = App()
