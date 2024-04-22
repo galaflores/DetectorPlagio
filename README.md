@@ -58,9 +58,6 @@ Para instalar y ejecutar el proyecto, sigue estos pasos:
     ```
 6. **Explora la aplicación:** Una vez que la aplicación esté en funcionamiento, puedes explorar las diferentes funcionalidades, cargar archivos de texto y ver los resultados de la detección de plagio.
 
-## Video Demostrativo
+## Video de la App
 
-[Enlace al video demostrativo](#)
-
-Este espacio está reservado para agregar un pequeño video que muestre el funcionamiento de la aplicación.
-
+![GIF Demostrativo](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGN0NHJnMHRnZWltN3FrenY4OG01d2NzMXQ0d3p4MG9yZGQ4ZWkybSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/S8Mw6A5rCWZxcuizdH/giphy.gif)
