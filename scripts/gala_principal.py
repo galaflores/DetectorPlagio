@@ -1,46 +1,51 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import nltk
+
 nltk.download('stopwords')
 import numpy as np
 from nltk.stem import LancasterStemmer
 from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import stopwords
-#from nltk.stem import WordNetLemmatizer
+# from nltk.stem import WordNetLemmatizer
 from nltk.util import ngrams
 import re
 import os
 
-lancStemmer = LancasterStemmer() #stemming algorithm Lancaster
-#lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
+lancStemmer = LancasterStemmer()  # stemming algorithm Lancaster
+
+
+# lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
 
 def remove_stopwords(text):
-  stopwords = set(nltk.corpus.stopwords.words('english'))
-  palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
-  text_lista = []
-  for palabra in palabras:
-    if palabra not in stopwords:
-      text_lista.append(palabra)
-  nuevo_texto = ' '.join(text_lista)
-  return nuevo_texto
+    stopwords = set(nltk.corpus.stopwords.words('english'))
+    palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
+    text_lista = []
+    for palabra in palabras:
+        if palabra not in stopwords:
+            text_lista.append(palabra)
+    nuevo_texto = ' '.join(text_lista)
+    return nuevo_texto
+
 
 def get_stemmer(text):
-  palabras = remove_stopwords(text)
-  palabras = palabras.split()
-  text_lista = []
-  for palabra in palabras:
-    nueva = lancStemmer.stem(palabra)
-    text_lista.append(nueva)
-  nuevo_texto = ' '.join(text_lista)
-  return nuevo_texto
+    palabras = remove_stopwords(text)
+    palabras = palabras.split()
+    text_lista = []
+    for palabra in palabras:
+        nueva = lancStemmer.stem(palabra)
+        text_lista.append(nueva)
+    nuevo_texto = ' '.join(text_lista)
+    return nuevo_texto
+
 
 def get_grams(text, n):
-  text = get_stemmer(text) #pre-procesa el parrafo
-  text = text.split() #separa los caracteres pre-procesados del parrafo en listas
-  grams = ngrams(text,n) #genera los ngrams
-  result = []
-  for ng in grams:
-    result.append(' '.join(ng)) #agrega los ngrams en una lista llamada result
-  return result
+    text = get_stemmer(text)  # pre-procesa el parrafo
+    text = text.split()  # separa los caracteres pre-procesados del parrafo en listas
+    grams = ngrams(text, n)  # genera los ngrams
+    result = []
+    for ng in grams:
+        result.append(' '.join(ng))  # agrega los ngrams en una lista llamada result
+    return result
 
 def pre_procesados (folder_path, n):
   preprocess_texts = []
@@ -60,15 +65,17 @@ def matriz_parrafos(grams1, grams2):
     for grama in grams_juntos:
         vector = []
         for palabra in grams_palabras:
-            vector.append(1 if palabra in grama else 0)  # compara las palabras de los grams a la palabra y agrega 1 o 0 al vector del parrafo
+            vector.append(
+                1 if palabra in grama else 0)  # compara las palabras de los grams a la palabra y agrega 1 o 0 al vector del parrafo
         matriz.append(vector)
     return matriz
+
 
 # Obtener n-gramas preprocesados
 folder_path = "../DetectorPlagio/textos_plagiados"
 preprocess_plagiados = pre_procesados(folder_path, 2)
 
-folder_path_og = "../DetectorPlagio/docs_org"
+folder_path_og = "../DetectorPlagio/docs_originales"
 preprocess_originales = pre_procesados(folder_path_og, 2)
 
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
