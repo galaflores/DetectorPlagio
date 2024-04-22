@@ -36,6 +36,17 @@ class Preprocesamiento:
         nuevo_texto = ' '.join(text_lista)
         return nuevo_texto
 
+    @staticmethod
+    def buscar_y_tokenizar(directorio: str, nombre_archivo: str) -> List[str]:
+        for filename in os.listdir(directorio):
+            if filename == nombre_archivo:
+                filepath = os.path.join(directorio, filename)
+                with open(filepath, 'r', encoding='latin1', errors='ignore') as file:
+                    text = file.read()
+                    sentences = nltk.sent_tokenize(text)
+                    return sentences
+        return []
+
     def get_grams(self, texto: str, ngram_number: int) -> List[str]:
         stemmed_text = self.get_stemmer(texto)
         text = re.findall(r"\w+", stemmed_text)
