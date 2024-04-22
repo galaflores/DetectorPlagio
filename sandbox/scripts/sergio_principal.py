@@ -71,10 +71,10 @@ def matriz_parrafos(grams1, grams2):
     return matriz
 
 # Obtener n-gramas preprocesados
-folder_path = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados" # Ruta de la carpeta con los textos plagiados
+folder_path = "/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
 preprocess_plagiados = pre_procesados(folder_path, 3)
 
-folder_path_og = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/docs_originales" # Ruta de la carpeta con los textos originales
+folder_path_og = "/docs_originales"  # Ruta de la carpeta con los textos originales
 preprocess_originales = pre_procesados(folder_path_og, 3)
 
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
@@ -201,7 +201,7 @@ def crear_documento_pdf(titulo, similitud, coincidencias):
 
     # Guardar el documento PDF en la carpeta de resultados
     nombre_archivo = f"Resultado_similitud_{titulo[0]}_y_{titulo[1]}.pdf"
-    ruta_archivo = os.path.join("/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/app/Resultados", nombre_archivo)
+    ruta_archivo = os.path.join("/app/Resultados", nombre_archivo)
     pdf.output(ruta_archivo)
 
 

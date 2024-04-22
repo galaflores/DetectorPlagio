@@ -1,5 +1,5 @@
-from app.Procesamiento import Procesamiento
-from app.Preprocesamineto import Preprocesamiento
+from Procesamiento import Procesamiento
+from Preprocesamineto import Preprocesamiento
 import pytest
 
 

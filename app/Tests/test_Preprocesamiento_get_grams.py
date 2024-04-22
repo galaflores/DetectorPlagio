@@ -1,4 +1,4 @@
-from app.Preprocesamineto import Preprocesamiento
+from Preprocesamineto import Preprocesamiento
 
 import pytest
 

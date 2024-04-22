@@ -99,12 +99,12 @@ def crear_documento_pdf(titulo, similitud, coincidencias):
         pdf.set_font("Arial", style="B")
         pdf.multi_cell(0, 10, txt=texto, border=1, align="L")
     nombre_archivo = f"Resultado_similitud_{titulo[0]}_y_{titulo[1]}.pdf"
-    ruta_archivo = os.path.join("/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/app/Resultados", nombre_archivo)
+    ruta_archivo = os.path.join("/app/Resultados", nombre_archivo)
     pdf.output(ruta_archivo)
 
 def main():
-    folder_path = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados"
-    folder_path_og = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/docs_originales"
+    folder_path = "/textos_plagiados"
+    folder_path_og = "/docs_originales"
     preprocess_plagiados = pre_procesados(folder_path, 3)
     preprocess_originales = pre_procesados(folder_path_og, 3)
     lista_titulos = []

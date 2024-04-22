@@ -1,4 +1,4 @@
-from app.Procesamiento import Procesamiento
+from Procesamiento import Procesamiento
 import pytest
 
 
