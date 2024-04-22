@@ -23,6 +23,12 @@ class Procesamiento:
     def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> List[
         Dict[str, Any]]:
         coincidencias: List[Dict[str, Any]] = []
+        # Contadores para las métricas AUC
+        TP = 0
+        FP = 0
+        TN = 0
+        FN = 0
+
         for sentence_orig in sentences_originales:
             for sentence_plag in sentences_plagiados:
                 matcher = difflib.SequenceMatcher(None, sentence_orig, sentence_plag)
@@ -44,8 +50,24 @@ class Procesamiento:
                             "cadena_plag": sentence_plag[match.b:match.b + match.size],
                             "longitud": match.size
                         })
-
-        return coincidencias
+                        if sentence_orig == sentence_plag:
+                            TP += 1
+                        else:
+                            FP += 1
+                else:
+                    if sentence_orig not in sentences_originales:
+                        TN += 1
+                    else:
+                        FN += 1
+        matriz_auc = {
+            'TP': TP,
+            'FP': FP,
+            'TN': TN,
+            'FN': FN
+        }
+        # print(matriz_auc)
+        # TODO: JOIN coincidencias y matriz_auc en un solo diccionario
+        return coincidencias, matriz_auc
 
     @staticmethod
     def crear_documento_pdf(titulo: Tuple[str, str], similitud: float, coincidencias: List[Dict[str, Any]]) -> None:
@@ -84,3 +106,4 @@ class Procesamiento:
         ruta_archivo = os.path.join("/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/app/Resultados",
                                     nombre_archivo)
         pdf.output(ruta_archivo)
+
