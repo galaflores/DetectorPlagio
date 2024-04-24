@@ -6,8 +6,16 @@ from fpdf import FPDF
 
 
 class Procesamiento:
+    """
+    Esta clase contiene funciones para procesar los textos y encontrar coincidencias
+    """
     @staticmethod
     def matriz_parrafos(grams1: list, grams2: list) -> list:
+        """
+        Esta función recibe dos listas de ngrams y devuelve una matriz con las palabras de ambos ngrams
+        Args: grams1: list, grams2: list
+        Returns: list
+        """
         grams_palabras = set(grams1 + grams2)  # set de palabras de ambos ngrams
         grams_juntos = [grams1, grams2]  # lista con ambas listas de los ngrams de cada parrafo
         matriz = []
@@ -21,6 +29,12 @@ class Procesamiento:
 
     @staticmethod
     def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
+        """
+        Esta función recibe dos listas de oraciones y devuelve las coincidencias y la matriz de AUC
+        Args: sentences_originales: List[str], sentences_plagiados: List[str]
+        Returns: Tuple[List[Dict[str, Any]], Dict[str, int]]
+
+        """
         coincidencias: List[Dict[str, Any]] = []
         # Contadores para las métricas AUC
         TP = 0
@@ -70,6 +84,12 @@ class Procesamiento:
 
     @staticmethod
     def crear_documento_pdf(titulo: Tuple[str, str], similitud: float, coincidencias: List[Dict[str, Any]]) -> None:
+        """
+        Esta función recibe un título, un porcentaje de similitud y una lista de coincidencias y crea un documento PDF
+        Args: titulo: Tuple[str, str], similitud: float, coincidencias: List[Dict[str, Any]]
+        Returns: None
+        
+        """
         # Crear un nuevo objeto PDF
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
