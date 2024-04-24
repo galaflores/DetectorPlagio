@@ -13,6 +13,9 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
     def preprocesar_texto(self, ruta: str, is_archivo: bool) -> list:
         """
         Esta funcion recibe una ruta y el tipo (si es archivo o carpeta) y manda a preprocesar el texto
+        Args: ruta: str, is_archivo: bool
+        Returns: list
+
         """
         if not is_archivo:
             return self.pre_procesados(ruta, 3)
@@ -24,6 +27,12 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
             return grams
 
     def analizar_similitud(self, folder_path_plagiados: str, folder_path_originales: str) -> List[List[Any]]:
+        """
+        Esta funcion recibe dos rutas y manda a preprocesar los textos y analizar la similitud
+        Args: folder_path_plagiados: str, folder_path_originales: str
+        Returns: List[List[Any]]
+
+        """
 
         preprocess_plagiados = self.preprocesar_texto(folder_path_plagiados, False)
         preprocess_originales = self.preprocesar_texto(folder_path_originales, False)
@@ -41,6 +50,12 @@ class DetectorDePlagio(Preprocesamineto.Preprocesamiento, Procesamiento.Procesam
 
     def generar_documentos_pdf(self, folder_path_plagiados: str, folder_path_og: str,
                                resultados: List[List[Any]]) -> List[List[Any]]:
+        """
+        Esta funcion recibe dos rutas y los resultados y manda a crear los documentos PDF
+        Args: folder_path_plagiados: str, folder_path_og: str, resultados: List[List[Any]]
+        Returns: List[List[Any]]
+        
+        """
         resultados_finales = []
         total_TP = 0
         total_FP = 0

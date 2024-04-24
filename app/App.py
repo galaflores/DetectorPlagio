@@ -45,6 +45,9 @@ class App(customtkinter.CTk, tk.Tk):
         sys.stdout = self.result_text
 
     def select_folder(self):
+        """
+        Esta función se encarga de abrir un cuadro de diálogo para seleccionar una carpeta.
+        """
         folder_path = filedialog.askdirectory(title="Seleccionar carpeta")
         if folder_path:
             self.folder_path_label.configure(text=folder_path)
@@ -60,6 +63,11 @@ class App(customtkinter.CTk, tk.Tk):
         self.detect_plagiarism(folder_path)
 
     def detect_plagiarism(self, selected_path: str):
+        """
+        Esta función se encarga de detectar el plagio en los textos seleccionados.
+        Args: selected_path: str
+        
+        """
         # TODO: Finalizar la implementación de la función detect_plagiarism para archivo en solitario
         if os.path.isfile(selected_path):
             preprocess_originales = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, True)
