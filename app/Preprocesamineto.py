@@ -17,6 +17,11 @@ class Preprocesamiento:
 
     @staticmethod
     def remove_stopwords(text: str) -> str:
+        """
+        Esta función recibe un texto y elimina las stopwords
+        Args: text: str
+        Returns: str
+        """
         stopwords = set(nltk.corpus.stopwords.words('english'))
         palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
         text_lista = []
@@ -27,6 +32,11 @@ class Preprocesamiento:
         return nuevo_texto
 
     def get_stemmer(self, texto: str) -> str:
+        """
+        Esta función recibe un texto y lo devuelve tokenizado y con stemming
+        Args: texto: str
+        Returns: str
+        """
         palabras = self.remove_stopwords(texto)
         palabras = palabras.split()
         text_lista = []
@@ -38,6 +48,11 @@ class Preprocesamiento:
 
     @staticmethod
     def buscar_y_tokenizar(directorio: str, nombre_archivo: str) -> List[str]:
+        """
+        Esta función recibe un directorio y un nombre de archivo y devuelve las oraciones tokenizadas
+        Args: directorio: str, nombre_archivo: str
+        Returns: List[str]
+        """
         for filename in os.listdir(directorio):
             if filename == nombre_archivo:
                 filepath = os.path.join(directorio, filename)
@@ -48,6 +63,12 @@ class Preprocesamiento:
         return []
 
     def get_grams(self, texto: str, ngram_number: int) -> List[str]:
+        """
+        Esta función recibe un texto y un número de ngramas y devuelve los ngramas
+        Args: texto: str, ngram_number: int
+        Returns: List[str]
+        
+        """
         stemmed_text = self.get_stemmer(texto)
         text = re.findall(r"\w+", stemmed_text)
         grams = ngrams(text, ngram_number)
@@ -57,6 +78,11 @@ class Preprocesamiento:
         return result
 
     def pre_procesados(self, folder_path: str, n: int) -> List[Tuple[str, List[str]]]:
+        """
+        Esta función recibe una ruta y un número de ngramas y devuelve los textos preprocesados
+        Args: folder_path: str, n: int
+        Returns: List[Tuple[str, List[str]]]
+        """
         preprocess_texts = []
         for fileid in os.listdir(folder_path):
             if fileid.endswith(".txt"):
