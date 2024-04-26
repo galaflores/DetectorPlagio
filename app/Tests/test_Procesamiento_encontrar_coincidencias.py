@@ -2,6 +2,7 @@ from Procesamiento import Procesamiento
 from Preprocesamineto import Preprocesamiento
 import pytest
 
+
 class TestEncontrarCoincidencias:
     def setup_method(self):
         self.procesamiento = Procesamiento()
@@ -16,8 +17,11 @@ class TestEncontrarCoincidencias:
 
         assert isinstance(coincidencias, list)
         assert all(isinstance(coincidencia, dict) for coincidencia in coincidencias)
-        assert all("cadena_orig" in coincidencia and "cadena_plag" in coincidencia and "longitud" in coincidencia for coincidencia in coincidencias)
-        assert all(isinstance(coincidencia["cadena_orig"], str) and isinstance(coincidencia["cadena_plag"], str) and isinstance(coincidencia["longitud"], int) for coincidencia in coincidencias)
+        assert all("cadena_orig" in coincidencia and "cadena_plag" in coincidencia and "longitud" in coincidencia for
+                   coincidencia in coincidencias)
+        assert all(isinstance(coincidencia["cadena_orig"], str) and isinstance(coincidencia["cadena_plag"],
+                                                                               str) and isinstance(
+            coincidencia["longitud"], int) for coincidencia in coincidencias)
 
     #  The method counts the number of true positives, false positives, true negatives, and false negatives.
     def test_counts_metrics(self):
