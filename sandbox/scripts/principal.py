@@ -4,18 +4,22 @@ import os
 import difflib
 from fpdf import FPDF
 
-nltk.download('stopwords')
 import numpy as np
 from nltk.stem import LancasterStemmer
 from nltk.corpus import stopwords
-# from nltk.stem import WordNetLemmatizer
+nltk.download('stopwords')
+from nltk.stem import WordNetLemmatizer
+nltk.download('wordnet')
 from nltk.util import ngrams
+import gensim.downloader as api
 import re
 
 lancStemmer = LancasterStemmer()  # stemming algorithm Lancaster
 
+lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
 
-# lemmatizer = WordNetLemmatizer() #lemmatizer algorithm
+word_vectors = api.load("glove-wiki-gigaword-100")
+
 def remove_stopwords(text):
     stopwords = set(nltk.corpus.stopwords.words('english'))
     palabras = [palabra.lower() for palabra in re.findall(r'\w+', text.lower())]
@@ -37,9 +41,19 @@ def get_stemmer(text):
     nuevo_texto = ' '.join(text_lista)
     return nuevo_texto
 
+def get_lemmatizer(text):
+    palabras = remove_stopwords(text)
+    palabras = palabras.split()
+    text_lista = []
+    for palabra in palabras:
+        nueva = lemmatizer.lemmatize(palabra)
+        text_lista.append(nueva)
+    nuevo_texto = ' '.join(text_lista)
+    return nuevo_texto
 
 def get_grams(text, n):
-    text = get_stemmer(text)  # pre-procesa el parrafo
+    text = get_lemmatizer(text)  # pre-procesa el parrafo
+    #text = get_stemmer(text)  # pre-procesa el parrafo
     text = text.split()  # separa los caracteres pre-procesados del parrafo en listas
     if n == 0:
         return text
@@ -77,12 +91,13 @@ def matriz_parrafos(grams1, grams2):
 
 
 # Obtener n-gramas preprocesados
-folder_path = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
+folder_path = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
 preprocess_plagiados = pre_procesados(folder_path, 3)
 
-folder_path_og = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/docs_originales"  # Ruta de la carpeta con los textos originales
+folder_path_og = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/docs_originales"  # Ruta de la carpeta con los textos originales
 preprocess_originales = pre_procesados(folder_path_og, 3)
 
+''' '''
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
     print(f'\nDocumento analizado: {name_plagiado}')
     for id_original, (name_original, grams_original) in enumerate(preprocess_originales, 1):
