@@ -52,8 +52,11 @@ def get_lemmatizer(text):
     return nuevo_texto
 
 def get_grams(text, n):
+    orig_text = text
     text = get_lemmatizer(text)  # pre-procesa el parrafo
-    #text = get_stemmer(text)  # pre-procesa el parrafo
+    text2 = get_stemmer(text)  # pre-procesa el parrafo
+
+    print(f'texto original: {orig_text} \n texto lematizado: {text} \n texto stemmer: {text2} \n ---------------------- \n')
     text = text.split()  # separa los caracteres pre-procesados del parrafo en listas
     if n == 0:
         return text
@@ -91,18 +94,17 @@ def matriz_parrafos(grams1, grams2):
 
 
 # Obtener n-gramas preprocesados
-folder_path = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
+folder_path = "../../textos_plagiados"  # Ruta de la carpeta con los textos plagiados
 preprocess_plagiados = pre_procesados(folder_path, 3)
 
-folder_path_og = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/docs_originales"  # Ruta de la carpeta con los textos originales
+folder_path_og = "../../docs_originales"  # Ruta de la carpeta con los textos originales
 preprocess_originales = pre_procesados(folder_path_og, 3)
 
-''' '''
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
-    print(f'\nDocumento analizado: {name_plagiado}')
+    # print(f'\nDocumento analizado: {name_plagiado}')
     for id_original, (name_original, grams_original) in enumerate(preprocess_originales, 1):
         similitud = cosine_similarity(matriz_parrafos(grams_plagiado, grams_original))
-        print(f"Similitud de Coseno entre {name_plagiado} y {name_original}: {similitud[0][1]}")
+        # print(f"Similitud de Coseno entre {name_plagiado} y {name_original}: {similitud[0][1]}")
 
 resultados = []
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):
@@ -172,7 +174,7 @@ def encontrar_coincidencias(sentences_originales, sentences_plagiados):
         'TN': TN,
         'FN': FN
     }
-    print(matriz_auc)
+    # print(matriz_auc)
 
     return coincidencias, matriz_auc
 
@@ -186,29 +188,30 @@ for titulo in resultados:
     resultados = []
     sentences_originales = buscar_y_tokenizar(folder_path_og, titulo[1])
     sentences_plagiados = buscar_y_tokenizar(folder_path, titulo[0])
-    print(f"Titulo: {titulo[0]}")
+    # print(f"Titulo: {titulo[0]}")
 
     if sentences_originales and sentences_plagiados:
         # Similitud = calcular_similitud_ngramas(sentences_originales, sentences_plagiados, 3)
         similitud = titulo[2]
-        print(f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%")
+        # print(f"Similitud entre '{titulo[0]}' y '{titulo[1]}': {similitud * 100:.2f}%")
         coincidencias, matriz_auc = encontrar_coincidencias(sentences_originales, sentences_plagiados)
         # Actualizar contadores totales de la matriz de auc
         total_TP += matriz_auc['TP']
         total_FP += matriz_auc['FP']
         total_TN += matriz_auc['TN']
         total_FN += matriz_auc['FN']
-        print(f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':")
+        # print(f"Coincidencias para '{titulo[0]}' y '{titulo[1]}':")
         total_coincidencias.extend(coincidencias)
 
-        print("----------------------------\n")
+        # print("----------------------------\n")
         for coincidencia in coincidencias:
-            print(f"Cadena original: {coincidencia['cadena_orig']} (Longitud: {coincidencia['longitud']})")
-            print(f"Cadena plagiada: {coincidencia['cadena_plag']}")
+            # print(f"Cadena original: {coincidencia['cadena_orig']} (Longitud: {coincidencia['longitud']})")
+            # print(f"Cadena plagiada: {coincidencia['cadena_plag']}")
             print()
     else:
-        print(f"No se encontraron oraciones en '{titulo[0]}' o '{titulo[1]}'")
-    print("----------------------------\n")
+        # print(f"No se encontraron oraciones en '{titulo[0]}' o '{titulo[1]}'")
+        print()
+    # print("----------------------------\n")
 
 # Calculando TPR, FPR y AUC
 TPR = total_TP / (total_TP + total_FN) if (total_TP + total_FN) != 0 else 0
@@ -216,6 +219,6 @@ FPR = total_FP / (total_FP + total_TN) if (total_FP + total_TN) != 0 else 0
 AUC = (1 + TPR - FPR) / 2
 
 # Imprimiendo los valores calculados
-print(f"TPR (Tasa de Verdaderos Positivos): {TPR:.2f}")
-print(f"FPR (Tasa de Falsos Positivos): {FPR:.2f}")
-print(f"AUC (Área bajo la curva ROC): {AUC:.2f}")
+# print(f"TPR (Tasa de Verdaderos Positivos): {TPR:.2f}")
+# print(f"FPR (Tasa de Falsos Positivos): {FPR:.2f}")
+# print(f"AUC (Área bajo la curva ROC): {AUC:.2f}")
