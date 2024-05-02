@@ -156,8 +156,8 @@ def detect_plagiarism_type(original_doc, plagiarized_doc):
             print("Plagiarism type: Unknown")
 
 
-folder_path = "../../textos_plagiados"
-folder_path_og = "../../docs_originales"
+folder_path = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/textos_plagiados"
+folder_path_og = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/docs_originales"
 
 tagged_originals = preprocess_docs(folder_path_og, 2, 'lemmatize')
 tagged_plagiarized = preprocess_docs(folder_path, 2, 'lemmatize')
