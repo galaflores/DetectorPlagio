@@ -11,11 +11,9 @@ import sys
 class App(customtkinter.CTk, tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("550x600")
+        self.geometry("1500x600")
         self.title("Detector de plagio")
-        self.path_plagiados = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados" # Cambiar la ruta.
-
-        # TODO: Boton para seleccionar archivo en solitairo de texto
+        self.path_originales = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/docs_originales"  # Cambiar la ruta.
 
         # Botón para seleccionar la carpeta y mostrar la ruta.
         self.select_folder_button = customtkinter.CTkButton(self, text="Seleccionar Carpeta",
@@ -35,11 +33,16 @@ class App(customtkinter.CTk, tk.Tk):
         self.folder_path_label = tk.Label(self, text="", font=("Arial", 8))  # Texto más pequeño
         self.folder_path_label.grid(row=1, column=0, columnspan=3, padx=20, pady=5, sticky="we")
 
-        # TODO: Agregar parametrizacion para el preprocesamiento de los textos
+        # Frame para contener el widget de texto y habilitar el desplazamiento lateral
+        self.text_frame = tk.Frame(self)
+        self.text_frame.grid(row=2, column=0, columnspan=3, padx=20, pady=10)
+        self.text_frame.grid_rowconfigure(0, weight=1)
+        self.text_frame.grid_columnconfigure(0, weight=1)
 
-        # Widget de texto para mostrar los resultados
-        self.result_text = tk.Text(self, height=20, width=60)
-        self.result_text.grid(row=2, column=0, columnspan=3, padx=20, pady=10)
+        # Widget de texto para mostrar los resultados dentro del Frame
+        self.result_text = tk.Text(self.text_frame, height=30, width=200)
+        self.result_text.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
+
 
         # Redirigir la salida estándar a result_text
         sys.stdout = self.result_text
@@ -55,7 +58,7 @@ class App(customtkinter.CTk, tk.Tk):
             self.start_button.configure(fg_color="green")  # Botón en verde cuando hay una ruta seleccionada
 
     def start_functionality(self):
-        self.result_text.insert(tk.END,"Iniciando análisis de similitud...\n")
+        self.result_text.insert(tk.END, "Iniciando análisis de similitud...\n")
         # Obtener la ruta de la carpeta
         folder_path = self.folder_path_label.cget("text")
 
@@ -68,50 +71,45 @@ class App(customtkinter.CTk, tk.Tk):
         Args: selected_path: str
         
         """
-        # TODO: Finalizar la implementación de la función detect_plagiarism para archivo en solitario
-        if os.path.isfile(selected_path):
-            preprocess_originales = DetectorDePlagio.DetectorDePlagio().preprocesar_texto(selected_path, True)
-            print("Es un archivo")
+        similitud = DetectorDePlagio.DetectorDePlagio().analizar_similitud(selected_path, self.path_originales, "lemmatize")
+        tipos_plagio = DetectorDePlagio.DetectorDePlagio().encontrar_tipos_de_plagio(similitud, selected_path, self.path_originales)
+        # pdf = DetectorDePlagio.DetectorDePlagio().generar_documentos_pdf(
+        # self.path_originales,
+        # selected_path,
+        # similitud
+        # )
 
-        elif os.path.isdir(selected_path):
-            similitud = DetectorDePlagio.DetectorDePlagio().analizar_similitud(
-                self.path_plagiados,
-                selected_path)
-            pdf = DetectorDePlagio.DetectorDePlagio().generar_documentos_pdf(
-                self.path_plagiados,
-                selected_path,
-                similitud
-            )
+        # Printing results similitud
+        for res in similitud:
+            plagio_title, original_title, similarity_score, original_doc = res
+            result_text = f"Similarity between '{plagio_title}' and '{original_title}': {similarity_score * 100:.2f}%"
+            self.result_text.insert(tk.END, result_text)
+            self.result_text.insert(tk.END, "\n")
+        self.result_text.insert(tk.END, "------------------------------------------------------------\n")
+        self.result_text.insert(tk.END, "\n")
 
-            for res in similitud:
-                self.result_text.insert(tk.END, res)
-                self.result_text.insert(tk.END, "\n")
-            self.result_text.insert(tk.END, "------------------------------------------------------------\n")
-            for res in pdf:
-                self.result_text.insert(tk.END, res[0])
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, res[1])
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, res[2])
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "------------------------------------------------------------\n")
-                self.result_text.insert(tk.END, "\n")
-                self.result_text.insert(tk.END, "\n")
-            self.result_text.insert(tk.END, "El analisis finalizo\n")
+        resultado = DetectorDePlagio.DetectorDePlagio().imprimir_resultados(tipos_plagio[0])
+        self.result_text.insert(tk.END, resultado)
+        self.result_text.insert(tk.END, "------------------------------------------------------------\n")
+        self.result_text.insert(tk.END, "\n")
 
-        else:
-            print("Error: La ruta seleccionada no es válida.")
+        auc_text = f'''
+        AUC Calculado 
+        TPR(Tasa de Verdaderos Positivos): {tipos_plagio[1][0]} \n
+        FPR(Tasa de Falsos Positivos): {tipos_plagio[1][1]} \n
+        AUC(AREA BAJO LA CURVA ROC): {tipos_plagio[1][2]} \n
+        '''
+        self.result_text.insert(tk.END, auc_text)
+        self.result_text.insert(tk.END, "------------------------------------------------------------\n")
+        self.result_text.insert(tk.END, "************************************************************\n")
+        self.result_text.insert(tk.END, "*                                                          *\n")
+        self.result_text.insert(tk.END, "*               El analisis finalizo                       *\n")
+        self.result_text.insert(tk.END, "*                                                          *\n")
+        self.result_text.insert(tk.END, "************************************************************\n")
 
     def clear_results(self):
         # Función para limpiar los resultados en la sección 4
         self.result_text.delete(1.0, tk.END)
-
 
 
 app = App()

@@ -1,86 +1,91 @@
 import difflib
 from typing import List, Dict, Any, Tuple
+
+from gensim.models import Doc2Vec
+
 from Preprocesamineto import Preprocesamiento
 import os
 from fpdf import FPDF
+import TiposDePlagio
 
 
-class Procesamiento:
+class Procesamiento(TiposDePlagio.TiposDePlagio):
     """
     Esta clase contiene funciones para procesar los textos y encontrar coincidencias
     """
-    @staticmethod
-    def matriz_parrafos(grams1: list, grams2: list) -> list:
-        """
-        Esta función recibe dos listas de ngrams y devuelve una matriz con las palabras de ambos ngrams
-        Args: grams1: list, grams2: list
-        Returns: list
-        """
-        grams_palabras = set(grams1 + grams2)  # set de palabras de ambos ngrams
-        grams_juntos = [grams1, grams2]  # lista con ambas listas de los ngrams de cada parrafo
-        matriz = []
-        for grama in grams_juntos:
-            vector = []
-            for palabra in grams_palabras:
-                vector.append(
-                    1 if palabra in grama else 0)  # compara las palabras de los grams a la palabra y agrega 1 o 0 al vector del parrafo
-            matriz.append(vector)
-        return matriz
+    def train_doc2vec(self, tagged_documents: List[Tuple[str, List[str]]]) -> Doc2Vec:
+        model = Doc2Vec(vector_size=80, window=5, min_count=1, epochs=200, dm=0)  # dm=0 for distributed bag of words (DBOW) mode
+        model.build_vocab(tagged_documents)
+        model.train(tagged_documents, total_examples=model.corpus_count, epochs=model.epochs)
+        return model
 
-    @staticmethod
-    def encontrar_coincidencias(sentences_originales: List[str], sentences_plagiados: List[str]) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
-        """
-        Esta función recibe dos listas de oraciones y devuelve las coincidencias y la matriz de AUC
-        Args: sentences_originales: List[str], sentences_plagiados: List[str]
-        Returns: Tuple[List[Dict[str, Any]], Dict[str, int]]
+    def calculate_similarity_doc2vec(self, doc1, doc2, model: Doc2Vec) -> float:
+        similarity = model.dv.similarity(doc1.tags[0], doc2.tags[0])
+        return similarity
 
-        """
+    def encontrar_coincidencias(self, sentences_originales: List[str], sentences_plagiados: List[str],
+                                model: Doc2Vec) -> Tuple[List[Dict[str, Any]], Dict[str, int], List[str]]:
         coincidencias: List[Dict[str, Any]] = []
-        # Contadores para las métricas AUC
-        TP = 0
-        FP = 0
-        TN = 0
-        FN = 0
+        tipo_plagio: Dict[str, int] = {'Cambio de voz': 0, 'Desorden de oraciones': 0, 'Cambio de tiempo verbal': 0,
+                                       'Parafraseo': 0,
+                                       'Inserción o reemplazo': 0}
+        TP: int = 0
+        FP: int = 0
+        TN: int = 0
+        FN: int = 0
 
         for sentence_orig in sentences_originales:
+            tiene_coincidencia = False
             for sentence_plag in sentences_plagiados:
-                matcher = difflib.SequenceMatcher(None, sentence_orig, sentence_plag)
-                match = matcher.find_longest_match(0, len(sentence_orig), 0, len(sentence_plag))
-                if match.size > 0:
-                    # Crear instancias de la clase Preprocesamiento
-                    preprocesamiento = Preprocesamiento()
-                    # Llamar al método get_stemmer de Preprocesamiento
-                    cadena_orig_stemmed = preprocesamiento.get_stemmer(sentence_orig[match.a:match.a + match.size])
-                    cadena_plag_stemmed = preprocesamiento.get_stemmer(sentence_plag[match.b:match.b + match.size])
-                    # Contar las palabras en las coincidencias después de aplicar el stemming y eliminar las stopwords
-                    palabras_orig = cadena_orig_stemmed.split()
-                    palabras_plag = cadena_plag_stemmed.split()
-
-                    if len(palabras_orig) > 3 and len(
-                            palabras_plag) > 3:  # Solo considerar coincidencias con más de una palabra
-                        coincidencias.append({
-                            "cadena_orig": sentence_orig[match.a:match.a + match.size],
-                            "cadena_plag": sentence_plag[match.b:match.b + match.size],
-                            "longitud": match.size
-                        })
-                        if sentence_orig == sentence_plag:
-                            TP += 1
-                        else:
-                            FP += 1
-                else:
-                    if sentence_orig not in sentences_originales:
-                        TN += 1
+                similarity = self.calculate_similarity_doc2vec(sentence_orig, sentence_plag, model)
+                if similarity > 0.6 and abs(len(sentence_orig) - len(sentence_plag)) < 15:
+                    coincidencias.append({
+                        "cadena_orig": sentence_orig,
+                        "cadena_plag": sentence_plag,
+                        "similitud": similarity
+                    })
+                    if sentence_orig == sentence_plag:
+                        TP += 1
                     else:
-                        FN += 1
-        matriz_auc = {
-            'TP': TP,
-            'FP': FP,
-            'TN': TN,
-            'FN': FN
-        }
+                        FP += 1
+                    tiene_coincidencia = True
+
+                    cambio_voz = self.detector_cambio_voz(' '.join(sentence_orig.words), ' '.join(sentence_plag.words))
+                    # print("ORACION ORIGINAL:",' '.join(sentence_orig.words))
+                    # print("ORACION PLAGIADA:",' '.join(sentence_plag.words))
+                    reorganizacion = self.detectar_reorganizacion(sentences_originales, sentences_plagiados)
+                    cambio_tiempo = self.detectar_cambio_tiempo(' '.join(sentence_orig.words),
+                                                                ' '.join(sentence_plag.words))
+                    parafraseo = self.detectar_parafraseo(' '.join(sentence_orig.words), ' '.join(sentence_plag.words))
+                    insertar_reemplazar = self.detectar_insertar_reemplazar(' '.join(sentence_orig.words),
+                                                                            ' '.join(sentence_plag.words))
+                    if cambio_voz:
+                        tipo_plagio['Cambio de voz'] += 1
+                    if reorganizacion:
+                        tipo_plagio['Desorden de oraciones'] += 1
+                    if cambio_tiempo:
+                        tipo_plagio['Cambio de tiempo verbal'] += 1
+                    if parafraseo:
+                        tipo_plagio['Parafraseo'] += 1
+                    if insertar_reemplazar:
+                        tipo_plagio['Inserción o reemplazo'] += 1
+
+            # print(tipo_plagio)
+            if not tiene_coincidencia:
+                FN += 1
+            else:
+                TN += 1
+        # Contabilizar tipos de plagio y encontrar el mayor
+        plagio_count = tipo_plagio
+        # mayor_tipo_plagio = max(plagio_count, key=plagio_count.get)
+        max_count = max(plagio_count.values())
+        mayor_tipo_plagio = [tipo for tipo, count in plagio_count.items() if count == max_count]
+
+        matriz_auc = {'TP': TP, 'FP': FP, 'TN': TN, 'FN': FN}
         # print(matriz_auc)
-        # TODO: JOIN coincidencias y matriz_auc en un solo diccionario
-        return coincidencias, matriz_auc
+        # print(f"Tipos de plagio contabilizados: {plagio_count}")
+        # print(f"Mayor tipo de plagio: {mayor_tipo_plagio}")
+        return coincidencias, matriz_auc, mayor_tipo_plagio
 
     @staticmethod
     def crear_documento_pdf(titulo: Tuple[str, str], similitud: float, coincidencias: List[Dict[str, Any]]) -> None:
