@@ -77,10 +77,10 @@ def matriz_parrafos(grams1, grams2):
 
 
 # Obtener n-gramas preprocesados
-folder_path = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/textos_plagiados"  # Ruta de la carpeta con los textos plagiados
+folder_path = "/testing-diez"  # Ruta de la carpeta con los textos plagiados
 preprocess_plagiados = pre_procesados(folder_path, 3)
 
-folder_path_og = "/Users/sergiogonzalez/Documents/GitHub/DetectorPlagio/docs_originales"  # Ruta de la carpeta con los textos originales
+folder_path_og = "/Documentos de Prueba/docs_originales"  # Ruta de la carpeta con los textos originales
 preprocess_originales = pre_procesados(folder_path_og, 3)
 
 for id_plagiado, (name_plagiado, grams_plagiado) in enumerate(preprocess_plagiados, 1):

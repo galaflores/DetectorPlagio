@@ -72,7 +72,7 @@ def matriz_parrafos(grams1, grams2):
 
 
 # Obtener n-gramas preprocesados
-folder_path = "../DetectorPlagio/textos_plagiados"
+folder_path = "../DetectorPlagio/testing-diez"
 preprocess_plagiados = pre_procesados(folder_path, 2)
 
 folder_path_og = "../DetectorPlagio/docs_originales"
