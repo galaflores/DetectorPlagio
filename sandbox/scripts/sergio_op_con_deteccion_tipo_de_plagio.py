@@ -27,7 +27,6 @@ def remove_stopwords(text):
     return nuevo_texto
 
 
-# %%
 def get_lemmatizer(text):
     palabras = remove_stopwords(text)
     palabras = palabras.split()
@@ -39,7 +38,6 @@ def get_lemmatizer(text):
     return nuevo_texto
 
 
-# %%
 def get_stemmer(text):
     palabras = remove_stopwords(text)
     palabras = palabras.split()
@@ -51,13 +49,12 @@ def get_stemmer(text):
     return nuevo_texto
 
 
-# %%
 def get_grams(text, ngram, method):
     result = []
 
     if method == 'lemmatize':
         text = get_lemmatizer(text)
-        if ngram == 0:  # Si ngram es 0, se retorna el texto completo sin ngramas
+        if ngram == 0:
             text = nltk.sent_tokenize(text)
             text = ' '.join(text)
             return text
@@ -69,7 +66,7 @@ def get_grams(text, ngram, method):
                 result.append(' '.join(ng))
     elif method == 'stemmer':
         text = get_stemmer(text)
-        if ngram == 0:  # Si ngram es 0, se retorna el texto completo sin ngramas
+        if ngram == 0:
             text = nltk.sent_tokenize(text)
             text = ' '.join(text)
             return text
@@ -85,7 +82,6 @@ def get_grams(text, ngram, method):
     return result
 
 
-# %%
 def token_sentence(text):
     sentences = nltk.sent_tokenize(text)
     filtered_sentences = []
@@ -96,8 +92,6 @@ def token_sentence(text):
     return filtered_sentences
 
 
-# %%
-# FUNCION QUE INCLUYE EL USO DE NGRAMAS
 def pre_process(folder_path, ngram, method):
     texto_preprocesado = []
     for fileid in os.listdir(folder_path):
@@ -111,14 +105,7 @@ def pre_process(folder_path, ngram, method):
     return texto_preprocesado
 
 
-# Preprocessing function for documents
-# Preprocessing function for documents
-# Preprocessing function for documents
-# Preprocessing function for documents
 def preprocess_docs(folder_path, ngram, method):
-    """
-    Preprocesses the documents in the given folder path.
-    """
     tagged_documents = []
     for fileid in os.listdir(folder_path):
         if fileid.endswith(".txt"):
@@ -126,22 +113,14 @@ def preprocess_docs(folder_path, ngram, method):
             with open(filepath, 'r', encoding='latin1', errors='ignore') as file:
                 text = file.read()
                 grams = get_grams(text, ngram, method)
-                # Ensure words are split into a list of strings and then converted to tuple
                 words = tuple(word.split() for word in grams)
-                # Flatten the list of lists into a single list of strings
                 words = [word for sublist in words for word in sublist]
                 tagged_documents.append(TaggedDocument(words=words, tags=[fileid]))
 
     return tagged_documents
 
 
-
-# %%
-# Training Doc2Vec model
 def train_doc2vec(tagged_documents):
-    """
-    Trains the Doc2Vec model with the given tagged documents.
-    """
     model = Doc2Vec(vector_size=100, window=5, min_count=1, epochs=200,
                     dm=0)  # dm=0 for distributed bag of words (DBOW) mode
     model.build_vocab(tagged_documents)
@@ -149,40 +128,49 @@ def train_doc2vec(tagged_documents):
     return model
 
 
-# %%
-# Function to calculate similarity between documents using Doc2Vec embeddings
 def calculate_similarity_doc2vec(doc1, doc2, model):
-    """
-    Calculates the similarity between two documents using Doc2Vec embeddings.
-    """
     vec1 = model.infer_vector(doc1.words)
     vec2 = model.infer_vector(doc2.words)
     similarity = model.dv.similarity(doc1.tags[0], doc2.tags[0])
     return similarity
 
 
-# Obtener n-gramas preprocesados
-folder_path = "../../textos_plagiados"  # Ruta de la carpeta con los textos plagiados)
-folder_path_og = "../../docs_originales"  # Ruta de la carpeta con los textos originales
+def print_plagiarism(original_sentence, plagiarized_sentence):
+    print("Coincidencias para el plagio:")
+    print("----------------------------")
+    print(f"Cadena original: {original_sentence} (Longitud: {len(original_sentence)})")
+    print(f"Cadena plagiada: {plagiarized_sentence}")
+    print()
 
 
-# Preprocessing original and plagiarized documents
+def detect_plagiarism_type(original_doc, plagiarized_doc):
+    # Comparing lengths to detect insertion or replacement
+    if len(plagiarized_doc) > len(original_doc):
+        print("Plagiarism type: Insertion or Replacement")
+    else:
+        # Comparing if sentences are shuffled
+        if original_doc != plagiarized_doc:
+            print("Plagiarism type: Sentence Shuffle")
+        else:
+            # You can implement more sophisticated methods to detect other types of plagiarism
+            print("Plagiarism type: Unknown")
+
+
+folder_path = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/textos_plagiados"
+folder_path_og = "/Users/galafloresgarcia/DesarrolloApps/DetectorPlagio/docs_originales"
+
 tagged_originals = preprocess_docs(folder_path_og, 2, 'lemmatize')
 tagged_plagiarized = preprocess_docs(folder_path, 2, 'lemmatize')
 
-# Training the Doc2Vec model
 model = train_doc2vec(tagged_originals + tagged_plagiarized)
 
-# List to store similarity results
 similarity_results = []
 
-# Iterating over each plagiarized text
 for plagio_doc in tagged_plagiarized:
     max_similarity = 0
     most_similar = ''
     most_similar_doc = ''
 
-    # Comparing with each original document
     for original_doc in tagged_originals:
         similarity = calculate_similarity_doc2vec(plagio_doc, original_doc, model)
         if similarity > max_similarity:
@@ -192,10 +180,15 @@ for plagio_doc in tagged_plagiarized:
 
     similarity_results.append([plagio_doc.tags[0], most_similar, max_similarity, most_similar_doc])
 
-# Sorting results by similarity in descending order
 similarity_results.sort(key=lambda x: x[2], reverse=True)
 
-# Printing results
 for result in similarity_results:
     plagio_title, original_title, similarity_score, original_doc = result
-    print(f"Similarity between '{plagio_title}' and '{original_title}': {similarity_score * 100:.2f}%")
+    print(f"Titulo: {plagio_title}")
+    print(f"Similitud entre '{plagio_title}' y '{original_title}': {similarity_score * 100:.2f}%")
+    # Retrieve original and plagiarized documents by title
+    original_doc_text = ' '.join([word for word in original_doc])
+    plagiarized_doc_text = [doc.words for doc in tagged_plagiarized if doc.tags[0] == plagio_title][0]
+    plagiarized_doc_text = ' '.join([word for word in plagiarized_doc_text])
+    print_plagiarism(original_doc_text, plagiarized_doc_text)
+    detect_plagiarism_type(original_doc_text, plagiarized_doc_text)
